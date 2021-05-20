@@ -4,76 +4,77 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.util.*;
+import java.lang.*;
 
 public class Server {
 	
-	private static ServerSocket listener;
-	
 	public static void main(String[] args) throws Exception
 	{
-		int clientNumber = 0;
+		Scanner input = new Scanner(System.in);  
 		
-		String serverAddress = "127.0.0.1";
-		int serverPort = 5000;
+		String ipAddress;
+		boolean ipAddressIsValid = false;
+		boolean portNumberIsValid = false;
 		
-		listener = new ServerSocket();
-		listener.setReuseAddress(true);
-		InetAddress serverIP = InetAddress.getByName(serverAddress);
-		
-		listener.bind(new InetSocketAddress(serverIP, serverPort));
-		
-		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
-		
-		try {
+		do {
+			System.out.print("Saisir l'adresse IP : ");
+			ipAddress = input.nextLine();
 			
-			while(true)
-			{
-				new ClientHandler(listener.accept(), clientNumber++).start();
-			}
+			ipAddressIsValid = validateIPAddress(ipAddress);
+			
+			if(!ipAddressIsValid)
+				System.out.print("Adresse IP invalide\n");
+			
+		} while(!ipAddressIsValid);
+				
+		do {
+			System.out.print("Saisir le port du serveur : ");
+			String portNumber = input.nextLine();
+				
+			portNumberIsValid = validatePortNumber(portNumber);
+				
+			if(!portNumberIsValid)
+				System.out.print("Numero de port invalide\n");
+				
+		} while(!portNumberIsValid);
+	}
+
+	/*https://stackoverflow.com/questions/4581877/validating-ipv4-string-in-java*/
+	private static boolean validateIPAddress(String ipAddress) {
+		try {
+			if (ipAddress == null || ipAddress.isEmpty())
+	            return false;
+	        
+	        String[] bytes = ipAddress.split("\\.", -1);
+	        if (bytes.length != 4)	//Si adresse IP sous format IPV4
+	            return false;
+	        
+	        for (String singleByte : bytes) {
+	            int byteValue = Integer.parseInt(singleByte);
+	            if ((byteValue < 0) || (byteValue > 255)) 
+	                return false;
+	        }
+	        return true;
 		}
-		finally {
-			listener.close();
+		catch(NumberFormatException e) {
+				return false;
 		}
 	}
 	
-	private static class ClientHandler extends Thread
-	{
-		private Socket socket;
-		private int clientNumber;
-		
-		public ClientHandler(Socket socket, int clientNumber)
-		{
-			this.socket = socket;
-			this.clientNumber = clientNumber;
-			System.out.println("New connection with client#" + clientNumber + " at " + socket);
+	private static boolean validatePortNumber(String portNumber) {
+		try {
+			int port = Integer.parseInt(portNumber);
+			if (port < 5000 || port > 5050)
+				return false;
+			
+			return true;
 		}
-		
-		public void run()
-		{
-			try
-			{
-				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-				
-				out.writeUTF("Hello from server - you are client#" + clientNumber);
-			} catch (IOException e)
-			{
-				System.out.println("Error handling client#" + clientNumber + ": " + e);	
-			}
-			finally
-			{
-				try
-				{
-					socket.close();
-				}
-				catch (IOException e)
-				{
-					System.out.println("Could not close a socket");
-				}
-				System.out.println("Connection with client# " + clientNumber + " closed");
-			}
+		catch(NumberFormatException e) {
+			return false;
 		}
 	}
+	
 }
 
 

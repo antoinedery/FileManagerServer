@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.io.*;
 
 public class Server {
 	
@@ -53,7 +54,7 @@ public class Server {
 		
 		listener.bind(new InetSocketAddress(serverIP, serverPort));
 											
-		System.out.format("The server is running on %s:%d%n", ipAddress, serverPort);
+		System.out.format("Le serveur fonctionne sur l'adresse %s:%d%n", ipAddress, serverPort);
 		
 		try {
 			
@@ -76,7 +77,7 @@ public class Server {
 		{
 			this.socket = socket;
 			this.clientNumber = clientNumber;
-			System.out.println("New connection with client#" + clientNumber + " at " + socket);
+			System.out.println("Nouvelle connexion du client #" + clientNumber + " à l'adresse " + socket);
 		}
 		
 		public void run()
@@ -87,16 +88,13 @@ public class Server {
 				do {
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					commandFromClient = in.readUTF();
-					
-					//System.out.println(commandFromClient);
-					
-					runCommand(commandFromClient);
-					
 									
+					runCommand(commandFromClient, socket);
+								
 				} while(!commandFromClient.equals("exit"));
 			} catch (IOException e)
 			{
-				System.out.println("Error handling client#" + clientNumber + ": " + e);	
+				System.out.println("Erreur avec le client #" + clientNumber + ": " + e);	
 			}
 			finally
 			{
@@ -106,42 +104,70 @@ public class Server {
 				}
 				catch (IOException e)
 				{
-					System.out.println("Could not close a socket");
+					System.out.println("Le socket ne peut être fermé");
 				}
-				System.out.println("Connection with client# " + clientNumber + " closed");
+				System.out.println("La connexion avec le client # " + clientNumber + " a été fermée.");
 			}
 		}
 	}
 	
-	private static void runCommand(String commandInput)
+	/*Fonction runCommand qui fait un switch case selon la commande reçu du client*/
+	private static void runCommand(String commandInput, Socket socket)
 	{
 		String[] command = commandInput.split(" ");
 		
 		switch(command[0])
 		{
 		case "cd":
-			System.out.println("Change directory to " + command[1]);
+			System.out.println("Change directory to " + command[1] + " (Not yet implemented)");
 			break;
 			
 		case "ls":
-			System.out.println("List of files ");
+			System.out.println("List of files " + " (Not yet implemented)");
 			break;
 			
 		case "mkdir":
-			System.out.println("Create new directory named " + command[1]);
+			createDirectory(command[1], socket);
 			break;
 			
 		case "upload":
-			System.out.println("Upload new file named " + command[1]);
+			System.out.println("Upload new file named " + command[1] + " (Not yet implemented)");
 			break;
 			
 		case "download":
-			System.out.println("Download file named " + command[1]);
+			System.out.println("Download file named " + command[1] + " (Not yet implemented)");
 			break;
 		}
+	}
+	
+	/*Fonction createDirectory utilisée avec le case mkdir*/
+	private static void createDirectory(String directoryName, Socket socket)
+	{
+		File folder = new File(directoryName);
+		
+		if(folder.exists())
+			sendToClient("Le dossier " + directoryName + " existe déjà.", socket);
+		
+		else if(folder.mkdir()) 
+			sendToClient("Le dossier " + directoryName + " a été créé avec succès.", socket);
+		
+		else 
+			sendToClient("Le dossier " + directoryName + " existe déjà.", socket);
 		
 	}
-
+	
+	/*Voir si on la met dans une autre classe pour utiliser avec Client aussi*/
+	/*Fonction sendToClient pour envoyé un message au client)*/
+	private static void sendToClient(String message, Socket socket)
+	{
+		try {
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			out.writeUTF(message);
+		} catch (IOException e)
+		{
+			System.out.println("Erreur : " + e);	
+		}
+	}
 }
 
 

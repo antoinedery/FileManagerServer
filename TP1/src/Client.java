@@ -50,7 +50,7 @@ public class Client {
 			
 		socket = new Socket(ipAddress, serverPort);
 				
-		System.out.format("Connexion etablie a l'adresse %s:%d%n", ipAddress, serverPort);
+		System.out.format("Connexion avec le serveur établie à l'adresse %s:%d%n", ipAddress, serverPort);
 		
 		String commandInput;
 		String[] command;
@@ -72,16 +72,16 @@ public class Client {
 			{
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				out.writeUTF(commandInput);
+				
+				DataInputStream in = new DataInputStream(socket.getInputStream());
+				String feedBackFromServer = in.readUTF();
+				System.out.println(feedBackFromServer);
 			}
 			
 		} while(!command[0].equals("exit"));
 		
 		System.out.println("Done");
 				
-		/*DataInputStream in = new DataInputStream(socket.getInputStream());
-		String helloMessageFromServer = in.readUTF();
-		System.out.println(helloMessageFromServer);*/
-		
 		socket.close();
 		input.close();
 	}

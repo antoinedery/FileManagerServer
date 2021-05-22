@@ -13,7 +13,7 @@ public class ServerExemple {
 	{
 		int clientNumber = 0;
 		
-		String serverAddress = "127.0.0.1";
+		String serverAddress = "120.122.125.126";
 		int serverPort = 5000;
 		
 		listener = new ServerSocket();

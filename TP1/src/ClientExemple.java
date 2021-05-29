@@ -1,8 +1,6 @@
 import java.io.DataInputStream;
 import java.net.Socket;
 
-import java.io.DataOutputStream;
-
 public class ClientExemple {
 	private static Socket socket;
 	

@@ -1,17 +1,20 @@
-import java.io.DataOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
-import java.io.*;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 
 public class Server {
 	
 	private static ServerSocket listener;
 	
+	/**
+	 * main function that runs the whole server program
+	 */
 	public static void main(String[] args) throws Exception
 	{
 		Scanner input = new Scanner(System.in);
@@ -54,7 +57,7 @@ public class Server {
 		
 		listener.bind(new InetSocketAddress(serverIP, serverPort));
 											
-		System.out.format("Le serveur fonctionne sur l'adresse %s:%d%n", ipAddress, serverPort);
+		System.out.format("Le serveur est connecté à l'adresse %s:%d%n", ipAddress, serverPort);
 		
 		try {
 			
@@ -101,72 +104,70 @@ public class Server {
 				try
 				{
 					socket.close();
+					System.out.println("La connexion avec le client #" + clientNumber + " a été fermée.");
 				}
 				catch (IOException e)
 				{
-					System.out.println("Le socket ne peut être fermé");
+					System.out.println("Le socket ne peut être fermé.");
 				}
-				System.out.println("La connexion avec le client # " + clientNumber + " a été fermée.");
 			}
 		}
 	}
 	
-	/*Fonction runCommand qui fait un switch case selon la commande reçu du client*/
-	private static void runCommand(String commandInput, Socket socket)
+	/**
+	 * Execute a block of code depending of the command called by the current client
+	 * @param commandInput : the command to be executed
+	 * @param socket : current client
+	 */
+	private static void runCommand(String commandInput, Socket socket) throws IOException
 	{
 		String[] command = commandInput.split(" ");
 		
 		switch(command[0])
 		{
 		case "cd":
-			System.out.println("Change directory to " + command[1] + " (Not yet implemented)");
+			Commands.changeDirectory(command[1], socket);
 			break;
 			
 		case "ls":
-			System.out.println("List of files " + " (Not yet implemented)");
+			Commands.listFiles(socket);
 			break;
 			
 		case "mkdir":
-			createDirectory(command[1], socket);
+			Commands.makeDirectory(command[1], socket);
 			break;
 			
 		case "upload":
-			System.out.println("Upload new file named " + command[1] + " (Not yet implemented)");
+			//TODO
 			break;
 			
 		case "download":
-			System.out.println("Download file named " + command[1] + " (Not yet implemented)");
+			//TODO
+			break;
+		
+		case "exit":
+			Commands.transmitStringToClient("Commande exit",socket);	//A changer
+			break;
+			
+		case "path":	//a enlever - seulement pour debugger
+			Commands.printPath(socket);	//A changer
 			break;
 		}
+		displayCommand(commandInput, socket);
 	}
 	
-	/*Fonction createDirectory utilisée avec le case mkdir*/
-	private static void createDirectory(String directoryName, Socket socket)
+	/**
+	 * Display the client information and the command called
+	 * @param command : command called by the current client
+	 * @param socket : current client
+	 */
+	private static void displayCommand(String command, Socket socket)
 	{
-		File folder = new File(directoryName);
+		String address = socket.getLocalAddress().toString().substring(1);	//Enlever le '/' au debut de l'adresse IP
+		int port = socket.getPort();
+		LocalTime timeNow = LocalTime.now().truncatedTo(ChronoUnit.SECONDS); //Sinon affiche nanosecondes
 		
-		if(folder.exists())
-			sendToClient("Le dossier " + directoryName + " existe déjà.", socket);
-		
-		else if(folder.mkdir()) 
-			sendToClient("Le dossier " + directoryName + " a été créé avec succès.", socket);
-		
-		else 
-			sendToClient("Le dossier " + directoryName + " existe déjà.", socket);
-		
-	}
-	
-	/*Voir si on la met dans une autre classe pour utiliser avec Client aussi*/
-	/*Fonction sendToClient pour envoyé un message au client)*/
-	private static void sendToClient(String message, Socket socket)
-	{
-		try {
-			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-			out.writeUTF(message);
-		} catch (IOException e)
-		{
-			System.out.println("Erreur : " + e);	
-		}
+		System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command);
 	}
 }
 

@@ -2,7 +2,6 @@ import java.util.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
-import java.nio.file.*;
 
 public class Client {
 
@@ -49,26 +48,16 @@ public class Client {
 
 		String commandInput;
 		String[] command;
-		Path currentDirectory = Paths.get("").toAbsolutePath();
 
 		do {
 			commandInput = input.nextLine();
 			command = commandInput.split(" ");
 
 			if (!(command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
-					|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")
-					|| command[0].equals("path"))) {	//Path a enlever - seulement pour debugger
+					|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
 				System.out.println("Commande invalide");
-			}
 
 			else {
-				if (command[0].equals("cd")) {
-					if (command[1].equals(".."))
-						currentDirectory = currentDirectory.getParent();
-
-					else if (Files.exists(Paths.get(command[1]).toAbsolutePath()))
-						currentDirectory = Paths.get(command[1]).toAbsolutePath();
-				}
 
 				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 				out.writeUTF(commandInput);

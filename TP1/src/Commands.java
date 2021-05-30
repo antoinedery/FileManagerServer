@@ -1,5 +1,7 @@
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.*;
@@ -23,7 +25,7 @@ public class Commands {
 	 */
 	public void changeDirectory(String directoryName, Socket socket) {
 		File tempDirectoryName = new File(currentDirectory.toString() + "\\" + directoryName);
-
+		
 		if (directoryName.equals("..")) {
 			currentDirectory = currentDirectory.getParent();
 			transmitStringToClient("Vous êtes dans le dossier '" + currentDirectory.toFile().getName() + "'.", socket);
@@ -62,8 +64,7 @@ public class Commands {
 			transmitStringToClient(directoryFilesList, socket);
 		}
 		else
-			transmitStringToClient("Ce répertoire ne contient aucun dossier/fichier.", socket);
-			
+			transmitStringToClient("Ce répertoire ne contient aucun dossier/fichier.", socket);	
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class Commands {
 	 */
 	public void makeDirectory(String directoryName, Socket socket) {
 		File folder = new File(currentDirectory.toString() + "\\" + directoryName);
-
+		
 		if (folder.mkdir()) // mkdir retourne vrai si le dossier est crée
 			transmitStringToClient("Le dossier '" + directoryName + "' a été créé avec succès.", socket);
 
@@ -82,8 +83,27 @@ public class Commands {
 			transmitStringToClient("Le dossier '" + directoryName + "' existe déjà.", socket);
 
 	}
-
+	
 	// TODO : public static void uploadFile()
+	public void uploadFile(String fileName, String fileSize, Socket socket) throws IOException
+	{
+		DataInputStream dis = new DataInputStream(socket.getInputStream());
+		FileOutputStream fos = new FileOutputStream(fileName);
+		byte[] buffer = new byte[4096];
+				
+		int filesize = Integer.parseInt(fileSize); // Send file size in separate msg
+		System.out.println("file size : " + filesize);
+		int read = 0;
+		int remaining = filesize;
+		while((read = dis.read(buffer, 0, Math.min(buffer.length, remaining))) > 0) {
+			remaining -= read;
+			fos.write(buffer, 0, read);
+		}
+		System.out.println("Done");
+		fos.close();
+	}
+	
+	
 	// TODO : public static void downloadFile()
 
 	/**

@@ -1,6 +1,8 @@
 import java.util.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.Socket;
 
 public class Client {
@@ -55,16 +57,40 @@ public class Client {
 
 			if (!(command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
 					|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
-				System.out.println("Commande invalide");
+				System.out.println("Commande invalide.");
 
 			else {
-
-				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-				out.writeUTF(commandInput);
-
-				DataInputStream in = new DataInputStream(socket.getInputStream());
-				String feedBackFromServer = in.readUTF();
-				System.out.println(feedBackFromServer);
+				
+					
+				if(command[0].equals("upload"))
+				{
+					/*a changer*/
+					File file = new File("C:\\Users\\Antoine\\Desktop\\Coding\\git\\INF3405\\TP1\\monDossier\\test.txt");
+					long fileSize = file.length();
+					
+					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+					out = new DataOutputStream(socket.getOutputStream());
+					out.writeUTF(commandInput+ " " +String.valueOf(fileSize));
+										
+					FileInputStream fis = new FileInputStream(file);
+					byte[] buffer = new byte[4096];
+					
+					while (fis.read(buffer) > 0) {
+						out.write(buffer);
+					}
+					
+					fis.close();
+				}
+				
+				else {
+					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+					out = new DataOutputStream(socket.getOutputStream());
+					out.writeUTF(commandInput);
+						
+					DataInputStream in = new DataInputStream(socket.getInputStream());
+					String feedBackFromServer = in.readUTF();
+					System.out.println(feedBackFromServer);			
+				}
 			}
 
 		} while (!command[0].equals("exit"));

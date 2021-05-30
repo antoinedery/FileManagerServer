@@ -83,12 +83,22 @@ public class Server {
 		public void run() {
 			try {
 				String commandFromClient;
+				
+				String[] command;
+				
 				do {
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					commandFromClient = in.readUTF();
 
-					runCommand(commandFromClient, clientCommand, socket);
+					command = commandFromClient.split(" ");
 
+					if ((command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
+							|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
+						runCommand(commandFromClient, clientCommand, socket);
+
+					
+					
+					
 				} while (!commandFromClient.equals("exit"));
 			} catch (IOException e) {
 				System.out.println("Erreur avec le client #" + clientNumber + ": " + e);
@@ -126,7 +136,7 @@ public class Server {
 			break;
 
 		case "upload":
-			// TODO
+			commands.uploadFile(command[1], command[2], socket);
 			break;
 
 		case "download":
@@ -134,10 +144,10 @@ public class Server {
 			break;
 
 		case "exit":
-			commands.transmitStringToClient("Vous avez été déconnecté avec succès", socket);
+			commands.transmitStringToClient("Vous avez été déconnecté avec succès.", socket);
 			break;
 		}
-		displayCommand(commandInput, socket);
+		displayCommand(command, socket);
 	}
 
 	/**
@@ -146,11 +156,15 @@ public class Server {
 	 * @param command : command called by the current client
 	 * @param socket  : current client
 	 */
-	private static void displayCommand(String command, Socket socket) {
+	private static void displayCommand(String[] command, Socket socket) {
 		String address = socket.getLocalAddress().toString().substring(1); // Enlever le '/' au debut de l'adresse IP
 		int port = socket.getPort();
 		LocalTime timeNow = LocalTime.now().truncatedTo(ChronoUnit.SECONDS); // Sinon affiche nanosecondes
-
-		System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command);
+		
+		if(command.length == 1)
+			System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command[0]);
+		else
+			System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command[0] + " " + command[1]);
 	}
 }
+

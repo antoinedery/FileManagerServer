@@ -4,10 +4,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Client {
 
 	private static Socket socket;
+	private static Path currentDirectory = Paths.get("").toAbsolutePath();
 
 	/**
 	 * main function that runs the whole client program
@@ -47,7 +50,7 @@ public class Client {
 		socket = new Socket(ipAddress, serverPort);
 
 		System.out.format("Connexion avec le serveur établie à l'adresse %s:%d%n", ipAddress, serverPort);
-
+		
 		String commandInput;
 		String[] command;
 
@@ -61,36 +64,34 @@ public class Client {
 
 			else {
 				
-					
-				if(command[0].equals("upload"))
-				{
-					/*a changer*/
-					File file = new File("C:\\Users\\Antoine\\Desktop\\Coding\\git\\INF3405\\TP1\\monDossier\\test.txt");
-					long fileSize = file.length();
-					
+				/*Faire une classe similaire a ServerCommands pour le client?? (pour alleger le code)*/
+				if (command[0].equals("upload")) {
+					File file = new File(currentDirectory.toString() + "\\" + command[1]);
+					int fileSize = (int) file.length();
+
 					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 					out = new DataOutputStream(socket.getOutputStream());
-					out.writeUTF(commandInput+ " " +String.valueOf(fileSize));
-										
+					out.writeUTF(commandInput + " " + String.valueOf(fileSize));
+
 					FileInputStream fis = new FileInputStream(file);
-					byte[] buffer = new byte[4096];
+					byte[] buffer = new byte[fileSize];
 					
-					while (fis.read(buffer) > 0) {
-						out.write(buffer);
-					}
-					
+					buffer = fis.readAllBytes();
+					out.write(buffer);
+
 					fis.close();
 				}
-				
+
 				else {
 					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 					out = new DataOutputStream(socket.getOutputStream());
 					out.writeUTF(commandInput);
-						
-					DataInputStream in = new DataInputStream(socket.getInputStream());
-					String feedBackFromServer = in.readUTF();
-					System.out.println(feedBackFromServer);			
+
 				}
+				//Recevoir le stream du serveur
+				DataInputStream in = new DataInputStream(socket.getInputStream());
+				String feedBackFromServer = in.readUTF();
+				System.out.println(feedBackFromServer);
 			}
 
 		} while (!command[0].equals("exit"));

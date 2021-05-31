@@ -71,34 +71,25 @@ public class Server {
 	private static class ClientHandler extends Thread {
 		private Socket socket;
 		private int clientNumber;
-		private Commands clientCommand;
+		private ServerCommands clientCommand;
 
 		public ClientHandler(Socket socket, int clientNumber) {
 			this.socket = socket;
 			this.clientNumber = clientNumber;
-			clientCommand = new Commands();
+			clientCommand = new ServerCommands(socket);
 			System.out.println("Nouvelle connexion du client #" + clientNumber + " à l'adresse " + socket);
 		}
 
 		public void run() {
 			try {
 				String commandFromClient;
-				
-				String[] command;
-				
+
 				do {
 					DataInputStream in = new DataInputStream(socket.getInputStream());
 					commandFromClient = in.readUTF();
 
-					command = commandFromClient.split(" ");
+					runCommand(commandFromClient, clientCommand, socket);
 
-					if ((command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
-							|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
-						runCommand(commandFromClient, clientCommand, socket);
-
-					
-					
-					
 				} while (!commandFromClient.equals("exit"));
 			} catch (IOException e) {
 				System.out.println("Erreur avec le client #" + clientNumber + ": " + e);
@@ -117,26 +108,27 @@ public class Server {
 	 * Execute a block of code depending of the command called by the current client
 	 * 
 	 * @param commandInput : the command to be executed
+	 * @param commands     : ServerCommands object related to current client
 	 * @param socket       : current client
 	 */
-	private static void runCommand(String commandInput, Commands commands, Socket socket) throws IOException {
+	private static void runCommand(String commandInput, ServerCommands commands, Socket socket) throws IOException {
 		String[] command = commandInput.split(" ");
 
 		switch (command[0]) {
 		case "cd":
-			commands.changeDirectory(command[1], socket);
+			commands.changeDirectory(command[1]);
 			break;
 
 		case "ls":
-			commands.listFiles(socket);
+			commands.listFiles();
 			break;
 
 		case "mkdir":
-			commands.makeDirectory(command[1], socket);
+			commands.makeDirectory(command[1]);
 			break;
 
 		case "upload":
-			commands.uploadFile(command[1], command[2], socket);
+			commands.uploadFile(command[1], command[2]); // Meilleure idée que passer les elements d'un tableau??
 			break;
 
 		case "download":
@@ -144,7 +136,7 @@ public class Server {
 			break;
 
 		case "exit":
-			commands.transmitStringToClient("Vous avez été déconnecté avec succès.", socket);
+			commands.transmitStringToClient("Vous avez été déconnecté avec succès.");
 			break;
 		}
 		displayCommand(command, socket);
@@ -159,12 +151,13 @@ public class Server {
 	private static void displayCommand(String[] command, Socket socket) {
 		String address = socket.getLocalAddress().toString().substring(1); // Enlever le '/' au debut de l'adresse IP
 		int port = socket.getPort();
-		LocalTime timeNow = LocalTime.now().truncatedTo(ChronoUnit.SECONDS); // Sinon affiche nanosecondes
-		
-		if(command.length == 1)
-			System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command[0]);
+		LocalTime timeNow = LocalTime.now().truncatedTo(ChronoUnit.SECONDS); // affiche pas les nanosecondes
+
+		if (command.length == 1)
+			System.out.println(
+					"[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command[0]);
 		else
-			System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : " + command[0] + " " + command[1]);
+			System.out.println("[" + address + ":" + port + " - " + LocalDate.now() + "@" + timeNow + "] : "
+					+ command[0] + " " + command[1]);
 	}
 }
-

@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class Validator {
 	
 	/**
@@ -59,4 +63,17 @@ public class Validator {
 		
 	}
 	
+	/**
+	 * Validate the file (has to exist in the folder)
+	 * @param command: array of command 
+	 * @return boolean if the file exists 
+	 */
+	public static boolean validateFile(File infile) {
+			if(!infile.exists()) { 
+				System.out.println("Erreur: Fichier " + infile.getName() + " introuvable");
+				return false;
+			}
+			else
+				return true;
+	}
 }

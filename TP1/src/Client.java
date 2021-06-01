@@ -61,7 +61,7 @@ public class Client {
 		
 		String commandInput;
 		String[] command;
-		Boolean commandIsValid;
+		boolean commandIsValid = true;
 		
 		do {
 			commandInput = input.nextLine();
@@ -74,27 +74,36 @@ public class Client {
 			
 			else {
 				
-				/*----------------UPLOAD INTO CURRENT DIRECTORY-------------- */
+				/*----------------si UPLOAD---------------*/
 				/*Faire une classe similaire a ServerCommands pour le client?? (pour alleger le code)*/
 				if (command[0].equals("upload")) {
+	
 					File file = new File(currentDirectory.toString() + "\\" + command[1]);
-				
-					int fileSize = (int) file.length();
-							
-					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-					out = new DataOutputStream(socket.getOutputStream());
-					out.writeUTF(commandInput + " " + String.valueOf(fileSize));
-				 
-					FileInputStream fis = new FileInputStream(file);
-					try {  
+	
+					//Verifier si le fichier a uploader existe dans le repertoire 
+					boolean fileExist = true;
+					fileExist = Validator.validateFile(file);
+					
+					//Si oui, transmettre les donnees du fichier au serveur 
+					if(fileExist) {
+						int fileSize = (int) file.length();
+
+						DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+						out = new DataOutputStream(socket.getOutputStream());
+						out.writeUTF(commandInput + " " + String.valueOf(fileSize));
+
+					
+						FileInputStream fis = new FileInputStream(file);
+
 						byte[] buffer = new byte[fileSize];
 						buffer = fis.readAllBytes();
 						out.write(buffer);
-					}catch (FileNotFoundException e) {
-				          System.out.println("Erreur : Fichier introuvable");
-			        }
-					
-					fis.close();
+						fis.close();
+						
+					}else{
+						//Sinon, poursuivre aux prochaines étapes 
+						continue;
+					}
 				}
 
 				else {

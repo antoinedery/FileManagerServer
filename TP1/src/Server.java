@@ -129,9 +129,9 @@ public class Server {
 			break;
 
 		case "upload":
-			commands.uploadFile(command[1], command[2]); // Meilleure idée que passer les elements d'un tableau??
+			commands.uploadFile(command[1], command[2]); // Meilleure idée que passer les elements d'un tableau?
 			break;
-
+			
 		case "download":
 			// TODO
 			break;

@@ -103,24 +103,22 @@ public class ServerCommands {
 	 * -of-the-stream
 	 */
 	public void uploadFile(String fileName, String fileSize) throws IOException {
-		int size = Integer.parseInt(fileSize);
 		
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		FileOutputStream fos = new FileOutputStream(fileName);
-	
+		int size = Integer.parseInt(fileSize);
 		byte[] buffer = new byte[size];
-			
+					
 		in.readFully(buffer);
-		
 		fos.write(buffer);
-		transmitStringToClient("Succes de chargement du fichier");
+		
+		transmitStringToClient("Chargement de fichier " + fileName + " reussi");
 		fos.close();
-
 	}
 
 //	public void DownloadFile(String fileName) throws IOException {
 //		DataInputStream in = new DataInputStream(socket.getInputStream());
-//		FileOutputStream fos = new FileOutputStream(fileName);
+//		FileOutputStream fos = new FileOutputStream(fileNamse);
 //		byte[] buffe = new byte[size];
 //
 //		in.readFully(buffer);

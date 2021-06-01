@@ -45,4 +45,18 @@ public class Validator {
 		}
 		
 	}
+	
+	/**
+	 * Validate the command input (has to be mkdir, cd, upload, download, ls or exit)
+	 * @param command: array of command 
+	 * @return boolean if the command input is one of the five available options
+	 */
+	public static boolean validateCommand(String[] command) {
+		if (!(command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
+				|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
+			return false;
+		return true;
+		
+	}
+	
 }

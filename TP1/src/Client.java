@@ -3,6 +3,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +18,10 @@ public class Client {
 	/**
 	 * main function that runs the whole client program
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws IOException {
+		
+		/*---------------SAISIE DES ADRESSES IP ET PORTS-------------- */
+
 		Scanner input = new Scanner(System.in);
 
 		String ipAddress;
@@ -51,34 +57,43 @@ public class Client {
 
 		System.out.format("Connexion avec le serveur établie à l'adresse %s:%d%n", ipAddress, serverPort);
 		
+		/*-----------------SAISIE DES COMMANDES-------------- */
+		
 		String commandInput;
 		String[] command;
-
+		Boolean commandIsValid;
+		
 		do {
 			commandInput = input.nextLine();
 			command = commandInput.split(" ");
 
-			if (!(command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
-					|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
+			commandIsValid = Validator.validateCommand(command);
+			
+			if (!commandIsValid)
 				System.out.println("Commande invalide.");
-
+			
 			else {
 				
+				/*----------------UPLOAD INTO CURRENT DIRECTORY-------------- */
 				/*Faire une classe similaire a ServerCommands pour le client?? (pour alleger le code)*/
 				if (command[0].equals("upload")) {
 					File file = new File(currentDirectory.toString() + "\\" + command[1]);
+				
 					int fileSize = (int) file.length();
-
+							
 					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 					out = new DataOutputStream(socket.getOutputStream());
 					out.writeUTF(commandInput + " " + String.valueOf(fileSize));
-
+				 
 					FileInputStream fis = new FileInputStream(file);
-					byte[] buffer = new byte[fileSize];
+					try {  
+						byte[] buffer = new byte[fileSize];
+						buffer = fis.readAllBytes();
+						out.write(buffer);
+					}catch (FileNotFoundException e) {
+				          System.out.println("Erreur : Fichier introuvable");
+			        }
 					
-					buffer = fis.readAllBytes();
-					out.write(buffer);
-
 					fis.close();
 				}
 

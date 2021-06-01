@@ -1,6 +1,8 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -102,22 +104,24 @@ public class ServerCommands {
 	 */
 	public void uploadFile(String fileName, String fileSize) throws IOException {
 		int size = Integer.parseInt(fileSize);
+		
 		DataInputStream in = new DataInputStream(socket.getInputStream());
 		FileOutputStream fos = new FileOutputStream(fileName);
+	
 		byte[] buffer = new byte[size];
-
+			
 		in.readFully(buffer);
+		
 		fos.write(buffer);
-
-		transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
-
+		transmitStringToClient("Succes de chargement du fichier");
 		fos.close();
+
 	}
 
 //	public void DownloadFile(String fileName) throws IOException {
 //		DataInputStream in = new DataInputStream(socket.getInputStream());
 //		FileOutputStream fos = new FileOutputStream(fileName);
-//		byte[] buffer = new byte[size];
+//		byte[] buffe = new byte[size];
 //
 //		in.readFully(buffer);
 //		fos.write(buffer);

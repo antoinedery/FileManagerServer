@@ -91,6 +91,7 @@ public class Server {
 					runCommand(commandFromClient, clientCommand, socket);
 
 				} while (!commandFromClient.equals("exit"));
+				
 			} catch (IOException e) {
 				System.out.println("Erreur avec le client #" + clientNumber + ": " + e);
 			} finally {

@@ -133,7 +133,7 @@ public class Server {
 			break;
 			
 		case "download":
-			commands.DownloadFile(command[1]);
+			commands.downloadFile(command[1]);
 			break;
 
 		case "exit":

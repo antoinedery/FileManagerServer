@@ -88,8 +88,7 @@ public class ServerCommands {
 	}
 
 	/**
-	 * Read a bytes array (file) from client and create a file in the server
-	 * directory
+	 * Read a bytes array (file) from client and create a file in the server directory
 	 * 
 	 * @param fileName : name of the file to be created
 	 * @param fileSize : size of the file (useful for buffer site)
@@ -111,11 +110,20 @@ public class ServerCommands {
 		in.readFully(buffer);
 		fos.write(buffer);
 		
-		transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
 		fos.close();
+		
+		File file = new File(fileName);
+		
+		if(Validator.validateFile(file))
+			transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
 	}
 
-	public void DownloadFile(String fileName) throws IOException {
+	/**
+	 * Write a bytes array (file) from server and create a file in the client directory
+	 * 
+	 * @param fileName : name of the file to be created
+	 */
+	public void downloadFile(String fileName) throws IOException {
 		
 		File file = new File(currentDirectory.toString() + "\\" + fileName);
 		int fileSize = (int) file.length();

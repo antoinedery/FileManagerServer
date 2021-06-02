@@ -133,7 +133,7 @@ public class Server {
 			break;
 			
 		case "download":
-			// TODO
+			commands.DownloadFile(command[1]);
 			break;
 
 		case "exit":

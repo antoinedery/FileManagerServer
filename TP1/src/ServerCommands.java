@@ -2,7 +2,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -112,22 +111,35 @@ public class ServerCommands {
 		in.readFully(buffer);
 		fos.write(buffer);
 		
-		transmitStringToClient("Chargement de fichier " + fileName + " reussi");
+		transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
 		fos.close();
 	}
 
-//	public void DownloadFile(String fileName) throws IOException {
-//		DataInputStream in = new DataInputStream(socket.getInputStream());
-//		FileOutputStream fos = new FileOutputStream(fileNamse);
-//		byte[] buffe = new byte[size];
-//
-//		in.readFully(buffer);
-//		fos.write(buffer);
-//
-//		transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
-//
-//		fos.close();
-//	}
+	public void DownloadFile(String fileName) throws IOException {
+		
+		File file = new File(currentDirectory.toString() + "\\" + fileName);
+		int fileSize = (int) file.length();
+		
+		if(Validator.validateFile(file)) {
+			transmitStringToClient("true");
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			out = new DataOutputStream(socket.getOutputStream());
+			out.writeUTF(String.valueOf(fileSize));	//Envoyer la taille du fichier
+	
+			FileInputStream fis = new FileInputStream(file);
+	
+			byte[] buffer = new byte[fileSize];
+			buffer = fis.readAllBytes();
+			out.write(buffer);
+			
+			fis.close();
+		}
+		
+		else {
+			transmitStringToClient("false");
+			transmitStringToClient("Erreur: Fichier " + fileName + " introuvable");
+		}
+	}
 
 	/**
 	 * Transmit a string to the current client

@@ -1,6 +1,4 @@
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class Validator {
 	
@@ -53,26 +51,30 @@ public class Validator {
 	/**
 	 * Validate the command input (has to be mkdir, cd, upload, download, ls or exit)
 	 * @param command: array of command 
-	 * @return boolean if the command input is one of the five available options
+	 * @return boolean if the command input is one of the six available options
 	 */
 	public static boolean validateCommand(String[] command) {
 		if (!(command[0].equals("mkdir") || command[0].equals("cd") || command[0].equals("upload")
 				|| command[0].equals("download") || command[0].equals("ls") || command[0].equals("exit")))
 			return false;
-		return true;
+		
+		else if((!(command[0].equals("ls") || command[0].equals("exit"))) && command.length != 2)
+			return false;
+		
+		else
+			return true;
 		
 	}
 	
 	/**
 	 * Validate the file (has to exist in the folder)
-	 * @param command: array of command 
+	 * @param infile: file to validate 
 	 * @return boolean if the file exists 
 	 */
 	public static boolean validateFile(File infile) {
-			if(!infile.exists()) { 
-				System.out.println("Erreur: Fichier " + infile.getName() + " introuvable");
+			if(!infile.exists()) 
 				return false;
-			}
+	
 			else
 				return true;
 	}

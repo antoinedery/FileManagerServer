@@ -3,9 +3,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,19 +79,15 @@ public class Client {
 	
 					File file = new File(currentDirectory.toString() + "\\" + command[1]);
 	
-					//Verifier si le fichier a uploader existe dans le repertoire 
-					boolean fileExist = true;
-					fileExist = Validator.validateFile(file);
-					
+					//Verifier si le fichier a uploader existe dans le repertoire 				
 					//Si oui, transmettre les donnees du fichier au serveur 
-					if(fileExist) {
+					if(Validator.validateFile(file)) {
 						int fileSize = (int) file.length();
 
 						DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 						out = new DataOutputStream(socket.getOutputStream());
-						out.writeUTF(commandInput + " " + String.valueOf(fileSize));
-
-					
+						out.writeUTF(commandInput + " " + String.valueOf(fileSize));				
+						
 						FileInputStream fis = new FileInputStream(file);
 
 						byte[] buffer = new byte[fileSize];
@@ -101,8 +96,48 @@ public class Client {
 						fis.close();
 						
 					}else{
+						System.out.println("Erreur: Le fichier " + command[0] + " est introuvable.");
 						//Sinon, poursuivre aux prochaines étapes 
 						continue;
+					}
+					
+					//Recevoir le stream du serveur
+					DataInputStream in = new DataInputStream(socket.getInputStream());
+					String feedBackFromServer = in.readUTF();
+					System.out.println(feedBackFromServer);
+				}
+				
+				else if(command[0].equals("download"))
+				{
+					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+					out = new DataOutputStream(socket.getOutputStream());
+					out.writeUTF(commandInput);
+								
+					DataInputStream feedbackFile = new DataInputStream(socket.getInputStream());
+					String validFile = feedbackFile.readUTF();
+					
+					if(!validFile.equals("false"))
+					{
+						DataInputStream inSize = new DataInputStream(socket.getInputStream());
+						String fileSize = inSize.readUTF();
+						
+						DataInputStream in = new DataInputStream(socket.getInputStream());
+						FileOutputStream fos = new FileOutputStream(command[1]);
+						int size = Integer.parseInt(fileSize);
+						byte[] buffer = new byte[size];
+									
+						in.readFully(buffer);
+						fos.write(buffer);
+
+						fos.close();
+						
+						System.out.println("Le fichier " + command[1] + " a bien été téléchargé.");
+					}
+					
+					else {
+						DataInputStream in = new DataInputStream(socket.getInputStream());
+						String feedBackFromServer = in.readUTF();
+						System.out.println(feedBackFromServer);
 					}
 				}
 
@@ -110,12 +145,11 @@ public class Client {
 					DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 					out = new DataOutputStream(socket.getOutputStream());
 					out.writeUTF(commandInput);
-
+					//Recevoir le stream du serveur
+					DataInputStream in = new DataInputStream(socket.getInputStream());
+					String feedBackFromServer = in.readUTF();
+					System.out.println(feedBackFromServer);
 				}
-				//Recevoir le stream du serveur
-				DataInputStream in = new DataInputStream(socket.getInputStream());
-				String feedBackFromServer = in.readUTF();
-				System.out.println(feedBackFromServer);
 			}
 
 		} while (!command[0].equals("exit"));

@@ -103,7 +103,7 @@ public class ServerCommands {
 	public void uploadFile(String fileName, String fileSize) throws IOException {
 		
 		DataInputStream in = new DataInputStream(socket.getInputStream());
-		FileOutputStream fos = new FileOutputStream(fileName);
+		FileOutputStream fos = new FileOutputStream(currentDirectory+"\\"+fileName);
 		int size = Integer.parseInt(fileSize);
 		byte[] buffer = new byte[size];
 					
@@ -112,9 +112,8 @@ public class ServerCommands {
 		
 		fos.close();
 		
-		File file = new File(fileName);
-		
-		if(Validator.validateFile(file))
+		File file = new File(currentDirectory+"\\"+fileName);
+		if(Validator.validateFile(file))	//Si le fichier est présent
 			transmitStringToClient("Le fichier " + fileName + " a bien été téléversé.");
 	}
 
@@ -132,7 +131,7 @@ public class ServerCommands {
 			transmitStringToClient("true");
 			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 			out = new DataOutputStream(socket.getOutputStream());
-			out.writeUTF(String.valueOf(fileSize));	//Envoyer la taille du fichier
+			out.writeUTF(String.valueOf(fileSize));	//Envoyer la taille du fichier d'abord
 	
 			FileInputStream fis = new FileInputStream(file);
 	
